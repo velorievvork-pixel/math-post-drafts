@@ -10,9 +10,9 @@ import { generateLesson, generateQuiz, gradeOpenAnswers, reexplain } from "./lib
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-if (!process.env.ANTHROPIC_API_KEY) {
+if (!process.env.GEMINI_API_KEY) {
   console.warn(
-    "[!] ANTHROPIC_API_KEY не задан. Создайте .env на основе .env.example и укажите ключ.",
+    "[!] GEMINI_API_KEY не задан. Создайте .env на основе .env.example и укажите ключ.",
   );
 }
 

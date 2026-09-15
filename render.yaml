@@ -7,7 +7,7 @@ services:
     buildCommand: npm install
     startCommand: npm start
     envVars:
-      - key: ANTHROPIC_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
-      - key: ANTHROPIC_MODEL
-        value: claude-opus-5
+      - key: GEMINI_MODEL
+        value: gemini-3.6-flash

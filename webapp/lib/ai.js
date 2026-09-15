@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 
-const client = new Anthropic();
-const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-5";
+const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
 const IMAGE_MEDIA_TYPES = new Set([
   "image/jpeg",
@@ -10,8 +10,7 @@ const IMAGE_MEDIA_TYPES = new Set([
   "image/webp",
 ]);
 
-/** Pulls the first top-level JSON object/array out of a model response,
- * tolerating ```json fences or stray commentary around it. */
+/** Fallback for the rare case the model doesn't respect responseMimeType. */
 function extractJSON(text) {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const candidate = fenced ? fenced[1] : text;
@@ -24,52 +23,44 @@ function extractJSON(text) {
   return JSON.parse(candidate.slice(start, end + 1));
 }
 
-async function callForJSON({ system, userContent, maxTokens, effort = "medium", stream = false }) {
-  const params = {
+async function callForJSON({ system, parts, maxOutputTokens, schema }) {
+  const response = await client.models.generateContent({
     model: MODEL,
-    max_tokens: maxTokens,
-    system,
-    output_config: { effort },
-    messages: [{ role: "user", content: userContent }],
-  };
+    contents: parts,
+    config: {
+      systemInstruction: system,
+      maxOutputTokens,
+      responseMimeType: "application/json",
+      responseSchema: schema,
+    },
+  });
 
-  // Long lesson/quiz generations can run past the non-streaming HTTP timeout,
-  // so route large-output calls through streaming and just wait for the end.
-  const response = stream
-    ? await client.messages.stream(params).finalMessage()
-    : await client.messages.create(params);
-
-  if (response.stop_reason === "refusal") {
-    throw new Error("Модель отказалась выполнить запрос");
+  const text = response.text;
+  if (!text) {
+    const reason = response.promptFeedback?.blockReason;
+    throw new Error(
+      reason ? `Модель отказалась выполнить запрос (${reason})` : "Пустой ответ модели",
+    );
   }
 
-  const textBlock = response.content.find((b) => b.type === "text");
-  if (!textBlock) throw new Error("Пустой ответ модели");
-  return extractJSON(textBlock.text);
+  try {
+    return JSON.parse(text);
+  } catch {
+    return extractJSON(text);
+  }
 }
 
-/** Converts uploaded files (multer in-memory) into Claude content blocks,
+/** Converts uploaded files (multer in-memory) into Gemini Part objects,
  * and returns any plain-text file contents to be inlined into the prompt. */
-function filesToBlocks(files = []) {
-  const blocks = [];
+function filesToParts(files = []) {
+  const parts = [];
   const inlineTexts = [];
   for (const file of files) {
-    if (IMAGE_MEDIA_TYPES.has(file.mimetype)) {
-      blocks.push({
-        type: "image",
-        source: {
-          type: "base64",
-          media_type: file.mimetype,
+    if (IMAGE_MEDIA_TYPES.has(file.mimetype) || file.mimetype === "application/pdf") {
+      parts.push({
+        inlineData: {
           data: file.buffer.toString("base64"),
-        },
-      });
-    } else if (file.mimetype === "application/pdf") {
-      blocks.push({
-        type: "document",
-        source: {
-          type: "base64",
-          media_type: "application/pdf",
-          data: file.buffer.toString("base64"),
+          mimeType: file.mimetype,
         },
       });
     } else if (file.mimetype.startsWith("text/")) {
@@ -80,7 +71,7 @@ function filesToBlocks(files = []) {
       );
     }
   }
-  return { blocks, inlineTexts };
+  return { parts, inlineTexts };
 }
 
 const LESSON_SYSTEM = `Ты — опытный и терпеливый преподаватель, который готовит подробные персональные уроки.
@@ -109,38 +100,83 @@ const LESSON_SYSTEM = `Ты — опытный и терпеливый преп�
 - В конце сформулируй checklist — короткие утверждения о том, что человек должен уметь
   объяснить или сделать после урока (именно на них потом будет опираться проверочный тест).
 
-Отвечай СТРОГО валидным JSON без markdown-разметки, без пояснений до или после, ровно по такой схеме:
-{
-  "title": "string — название темы урока",
-  "level": "начальный | средний | продвинутый",
-  "intro": "string — 3-6 предложений: зачем это нужно знать, что зацепит внимание",
-  "sections": [
-    { "heading": "string", "content": "string, минимум 250-400 слов" }
+Отвечай строго по заданной JSON-схеме, без пояснений вне JSON. Поле level — одно из значений:
+"начальный", "средний", "продвинутый".`;
+
+const LESSON_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    title: { type: "STRING", description: "Название темы урока" },
+    level: {
+      type: "STRING",
+      format: "enum",
+      enum: ["начальный", "средний", "продвинутый"],
+    },
+    intro: { type: "STRING", description: "3-6 предложений: зачем это нужно знать" },
+    sections: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          heading: { type: "STRING" },
+          content: { type: "STRING", description: "минимум 250-400 слов" },
+        },
+        required: ["heading", "content"],
+      },
+    },
+    workedExamples: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          title: { type: "STRING" },
+          problem: { type: "STRING" },
+          solution: { type: "STRING", description: "подробное пошаговое решение" },
+        },
+        required: ["title", "problem", "solution"],
+      },
+    },
+    practiceProblems: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          problem: { type: "STRING" },
+          solution: { type: "STRING" },
+        },
+        required: ["problem", "solution"],
+      },
+    },
+    keyTakeaways: { type: "ARRAY", items: { type: "STRING" } },
+    commonMistakes: { type: "ARRAY", items: { type: "STRING" } },
+    checklist: { type: "ARRAY", items: { type: "STRING" } },
+  },
+  required: [
+    "title",
+    "level",
+    "intro",
+    "sections",
+    "workedExamples",
+    "practiceProblems",
+    "keyTakeaways",
+    "commonMistakes",
+    "checklist",
   ],
-  "workedExamples": [
-    { "title": "string", "problem": "string — условие", "solution": "string — подробное пошаговое решение" }
-  ],
-  "practiceProblems": [
-    { "problem": "string — условие задачи для самостоятельного решения", "solution": "string — полное решение" }
-  ],
-  "keyTakeaways": ["string", "..."],
-  "commonMistakes": ["string", "..."],
-  "checklist": ["string", "..."]
-}`;
+};
 
 export async function generateLesson({ topic, files }) {
-  const { blocks, inlineTexts } = filesToBlocks(files);
+  const { parts: fileParts, inlineTexts } = filesToParts(files);
 
   const pieces = [];
   if (topic && topic.trim()) {
     pieces.push(`Тема/запрос от ученика: "${topic.trim()}"`);
   }
-  if (blocks.some((b) => b.type === "image")) {
+  if (fileParts.some((p) => IMAGE_MEDIA_TYPES.has(p.inlineData.mimeType))) {
     pieces.push(
       "К запросу приложены изображения — используй их как основной источник материала (это может быть фото страницы учебника, конспекта, задачи, доски и т.п.).",
     );
   }
-  if (blocks.some((b) => b.type === "document")) {
+  if (fileParts.some((p) => p.inlineData.mimeType === "application/pdf")) {
     pieces.push("К запросу приложен PDF-файл — используй его как источник материала.");
   }
   if (inlineTexts.length) {
@@ -157,10 +193,9 @@ export async function generateLesson({ topic, files }) {
 
   return callForJSON({
     system: LESSON_SYSTEM,
-    userContent: [{ type: "text", text: pieces.join("\n\n") }, ...blocks],
-    maxTokens: 20000,
-    effort: "high",
-    stream: true,
+    parts: [{ text: pieces.join("\n\n") }, ...fileParts],
+    maxOutputTokens: 24000,
+    schema: LESSON_SCHEMA,
   });
 }
 
@@ -181,27 +216,49 @@ const QUIZ_SYSTEM = `Ты составляешь проверочный тест
   для каждого укажи keyPoints — 2-4 пункта, которые обязательно должны быть в хорошем ответе
   (это НЕ увидит ученик, это только для проверки).
 
-Отвечай СТРОГО валидным JSON без markdown-разметки, ровно по схеме:
-{
-  "mcq": [
-    { "question": "string", "options": ["string","string","string","string"], "correctIndex": 0, "explanation": "string — почему это верный ответ" }
-  ],
-  "open": [
-    { "question": "string", "keyPoints": ["string", "..."] }
-  ]
-}`;
+Отвечай строго по заданной JSON-схеме, без пояснений вне JSON.`;
+
+const QUIZ_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    mcq: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          question: { type: "STRING" },
+          options: { type: "ARRAY", items: { type: "STRING" } },
+          correctIndex: { type: "INTEGER" },
+          explanation: { type: "STRING" },
+        },
+        required: ["question", "options", "correctIndex", "explanation"],
+      },
+    },
+    open: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          question: { type: "STRING" },
+          keyPoints: { type: "ARRAY", items: { type: "STRING" } },
+        },
+        required: ["question", "keyPoints"],
+      },
+    },
+  },
+  required: ["mcq", "open"],
+};
 
 export async function generateQuiz({ lesson }) {
   return callForJSON({
     system: QUIZ_SYSTEM,
-    userContent: [
+    parts: [
       {
-        type: "text",
         text: `Вот урок в формате JSON:\n${JSON.stringify(lesson)}\n\nСоставь тест по правилам из системной инструкции.`,
       },
     ],
-    maxTokens: 6000,
-    stream: true,
+    maxOutputTokens: 8000,
+    schema: QUIZ_SCHEMA,
   });
 }
 
@@ -209,10 +266,20 @@ const GRADE_SYSTEM = `Ты проверяешь открытые ответы у
 Для каждого вопроса тебе дан сам вопрос, ключевые пункты правильного ответа (keyPoints) и ответ ученика.
 Оцени по существу (не придирайся к формулировкам), учитывай, что ответ может быть кратким, но верным по сути.
 
-Отвечай СТРОГО валидным JSON без markdown-разметки, ровно по схеме — массив в том же порядке, что и вопросы:
-[
-  { "correct": true/false, "score": число от 0 до 1, "feedback": "string — короткая обратная связь ученику, на русском, доброжелательно" }
-]`;
+Отвечай строго по заданной JSON-схеме (массив в том же порядке, что и вопросы), без пояснений вне JSON.`;
+
+const GRADE_SCHEMA = {
+  type: "ARRAY",
+  items: {
+    type: "OBJECT",
+    properties: {
+      correct: { type: "BOOLEAN" },
+      score: { type: "NUMBER", description: "число от 0 до 1" },
+      feedback: { type: "STRING", description: "короткая доброжелательная обратная связь" },
+    },
+    required: ["correct", "score", "feedback"],
+  },
+};
 
 export async function gradeOpenAnswers({ lesson, open, answers }) {
   const items = open.map((q, i) => ({
@@ -223,13 +290,13 @@ export async function gradeOpenAnswers({ lesson, open, answers }) {
 
   return callForJSON({
     system: GRADE_SYSTEM,
-    userContent: [
+    parts: [
       {
-        type: "text",
         text: `Контекст урока (тема): "${lesson.title}"\n\nВопросы и ответы ученика:\n${JSON.stringify(items, null, 2)}`,
       },
     ],
-    maxTokens: 3000,
+    maxOutputTokens: 4000,
+    schema: GRADE_SCHEMA,
   });
 }
 
@@ -238,18 +305,26 @@ const REEXPLAIN_SYSTEM = `Ученик прошёл тест по уроку и 
 Напиши короткое, тёплое и по делу дополнительное объяснение именно этих слабых мест —
 другими словами, с другим примером, чем в основном уроке, чтобы действительно помочь понять.
 
-Отвечай СТРОГО валидным JSON без markdown-разметки, ровно по схеме:
-{ "title": "string — например 'Разбираем то, что вызвало трудности'", "content": "string — 150-350 слов" }`;
+Отвечай строго по заданной JSON-схеме, без пояснений вне JSON. Поле content — 150-350 слов.`;
+
+const REEXPLAIN_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    title: { type: "STRING" },
+    content: { type: "STRING" },
+  },
+  required: ["title", "content"],
+};
 
 export async function reexplain({ lesson, weakPoints }) {
   return callForJSON({
     system: REEXPLAIN_SYSTEM,
-    userContent: [
+    parts: [
       {
-        type: "text",
         text: `Урок:\n${JSON.stringify(lesson)}\n\nСлабые места ученика:\n${weakPoints.map((w) => `- ${w}`).join("\n")}`,
       },
     ],
-    maxTokens: 1500,
+    maxOutputTokens: 2000,
+    schema: REEXPLAIN_SCHEMA,
   });
 }
