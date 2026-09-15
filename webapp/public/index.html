@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Учись со мной — персональный урок по любой теме</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">📚 Учись со мной</div>
+    <div class="tagline">Пришли тему, фото или файл — получи урок и проверь себя</div>
+  </header>
+
+  <main class="wrap">
+    <!-- START -->
+    <section id="view-start" class="view">
+      <div class="card">
+        <h1>Чему хочешь научиться?</h1>
+        <p class="muted">
+          Опиши тему словами, и/или прикрепи фото учебника, конспекта, задачи, доски —
+          или PDF/текстовый файл. Я разберу материал, соберу урок и в конце проверю,
+          что ты всё точно понял.
+        </p>
+
+        <form id="lesson-form">
+          <label class="field">
+            <span>Тема или вопрос (можно оставить пустым, если прикрепишь файл)</span>
+            <textarea id="topic" rows="3" placeholder="Например: объясни теорему Пифагора / как решать квадратные уравнения / что на этом фото из учебника"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Фото / PDF / текстовый файл (до 5 файлов, по 10 МБ)</span>
+            <input id="files" type="file" multiple accept="image/*,application/pdf,text/plain" />
+          </label>
+
+          <div id="file-preview" class="file-preview"></div>
+
+          <button type="submit" class="btn primary">Составить урок</button>
+        </form>
+        <p id="start-error" class="error hidden"></p>
+      </div>
+    </section>
+
+    <!-- LOADING -->
+    <section id="view-loading" class="view hidden">
+      <div class="card center">
+        <div class="spinner"></div>
+        <p id="loading-text">Готовлю урок…</p>
+      </div>
+    </section>
+
+    <!-- LESSON -->
+    <section id="view-lesson" class="view hidden">
+      <div class="card">
+        <span class="badge" id="lesson-level"></span>
+        <h1 id="lesson-title"></h1>
+        <p id="lesson-intro" class="intro"></p>
+
+        <div id="lesson-sections"></div>
+
+        <div class="callout" id="lesson-takeaways-box">
+          <h3>Главное</h3>
+          <ul id="lesson-takeaways"></ul>
+        </div>
+
+        <div class="callout warn" id="lesson-mistakes-box">
+          <h3>Частые ошибки</h3>
+          <ul id="lesson-mistakes"></ul>
+        </div>
+
+        <div class="actions">
+          <button id="btn-restart-1" class="btn ghost">Новая тема</button>
+          <button id="btn-start-quiz" class="btn primary">Проверить, что я понял →</button>
+        </div>
+        <p id="quiz-error" class="error hidden"></p>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="view-quiz" class="view hidden">
+      <div class="card">
+        <h1>Проверь себя</h1>
+        <p class="muted">Отвечай честно — так вернее увидишь, что стоит повторить.</p>
+        <form id="quiz-form">
+          <div id="quiz-mcq"></div>
+          <div id="quiz-open"></div>
+          <button type="submit" class="btn primary">Проверить ответы</button>
+        </form>
+        <p id="grade-error" class="error hidden"></p>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="view-results" class="view hidden">
+      <div class="card">
+        <div id="result-banner" class="result-banner"></div>
+
+        <h3>Разбор ответов</h3>
+        <div id="result-details"></div>
+
+        <div id="reexplain-box" class="callout hidden"></div>
+
+        <div class="actions">
+          <button id="btn-reexplain" class="btn ghost hidden">Объяснить сложные места ещё раз</button>
+          <button id="btn-retry-quiz" class="btn ghost hidden">Пройти тест заново</button>
+          <button id="btn-restart-2" class="btn primary">Новая тема</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
