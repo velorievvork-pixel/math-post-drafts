@@ -31,6 +31,25 @@ npm start
 
 Откройте http://localhost:3000
 
+## Деплой на Render
+
+В корне репозитория есть `render.yaml` (Render Blueprint), который описывает сервис
+целиком — не нужно ничего настраивать руками, кроме ключа API.
+
+1. Зайдите на https://dashboard.render.com/blueprints и нажмите **New Blueprint Instance**
+   (или откройте `https://render.com/deploy?repo=https://github.com/velorievvork-pixel/math-post-drafts`).
+2. Подключите GitHub-аккаунт и выберите репозиторий `velorievvork-pixel/math-post-drafts`,
+   ветку `claude/learning-website-pjn8to` (или `main`, если ветка уже туда влита).
+3. Render найдёт `render.yaml` и предложит создать веб-сервис `learn-with-claude`
+   (билд из папки `webapp/`, план Free).
+4. Когда попросит — впишите `ANTHROPIC_API_KEY` (это единственный обязательный секрет).
+5. Нажмите **Apply** — через пару минут сайт будет доступен по ссылке вида
+   `https://learn-with-claude.onrender.com`.
+
+Бесплатный план Render "засыпает" после ~15 минут без запросов и просыпается
+~30-60 секунд на первый запрос после простоя — для личного использования это нормально,
+для постоянной доступности стоит взять платный план.
+
 ## Переменные окружения (`.env`)
 
 | Переменная | Обязательна | Назначение |
