@@ -69,7 +69,7 @@ document.getElementById("lesson-form").addEventListener("submit", async (e) => {
   formData.append("topic", topic);
   [...files].forEach((f) => formData.append("files", f));
 
-  showLoading("Разбираю материал и готовлю урок…");
+  showLoading("Разбираю материал и готовлю подробный урок на 30–45 минут — это может занять минуту-другую…");
   try {
     const data = await apiFetch("/api/lesson", { method: "POST", body: formData });
     state.lesson = data.lesson;
@@ -100,6 +100,27 @@ function renderLesson(lesson) {
     sectionsBox.appendChild(div);
   });
 
+  const examplesBox = document.getElementById("lesson-examples");
+  examplesBox.innerHTML = "";
+  const examples = lesson.workedExamples || [];
+  document.getElementById("lesson-examples-title").classList.toggle("hidden", !examples.length);
+  examples.forEach((ex) => {
+    const div = document.createElement("div");
+    div.className = "example-block";
+    const h4 = document.createElement("h4");
+    h4.textContent = ex.title || "Пример";
+    const problem = document.createElement("p");
+    problem.className = "problem";
+    problem.textContent = ex.problem;
+    const solution = document.createElement("p");
+    solution.className = "solution";
+    solution.textContent = ex.solution;
+    div.appendChild(h4);
+    div.appendChild(problem);
+    div.appendChild(solution);
+    examplesBox.appendChild(div);
+  });
+
   fillList("lesson-takeaways", lesson.keyTakeaways);
   document
     .getElementById("lesson-takeaways-box")
@@ -109,6 +130,35 @@ function renderLesson(lesson) {
   document
     .getElementById("lesson-mistakes-box")
     .classList.toggle("hidden", !(lesson.commonMistakes || []).length);
+
+  const practiceBox = document.getElementById("lesson-practice");
+  practiceBox.innerHTML = "";
+  const practice = lesson.practiceProblems || [];
+  document.getElementById("lesson-practice-title").classList.toggle("hidden", !practice.length);
+  document.getElementById("lesson-practice-hint").classList.toggle("hidden", !practice.length);
+  practice.forEach((task, i) => {
+    const div = document.createElement("div");
+    div.className = "practice-block";
+    const problem = document.createElement("p");
+    problem.className = "problem";
+    problem.textContent = `${i + 1}. ${task.problem}`;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "reveal-btn";
+    btn.textContent = "Показать решение";
+    const solution = document.createElement("p");
+    solution.className = "solution hidden";
+    solution.textContent = task.solution;
+    btn.addEventListener("click", () => {
+      const willShow = solution.classList.contains("hidden");
+      solution.classList.toggle("hidden", !willShow);
+      btn.textContent = willShow ? "Скрыть решение" : "Показать решение";
+    });
+    div.appendChild(problem);
+    div.appendChild(btn);
+    div.appendChild(solution);
+    practiceBox.appendChild(div);
+  });
 }
 
 function fillList(id, items = []) {

@@ -114,6 +114,8 @@ textarea { resize: vertical; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+
 .badge {
   display: inline-block;
   font-size: 12px;
@@ -126,10 +128,49 @@ textarea { resize: vertical; }
   border-radius: 999px;
   margin-bottom: 10px;
 }
+.badge.time {
+  text-transform: none;
+  color: #7a5b00;
+  background: var(--warn-bg);
+}
+
+.example-block, .practice-block {
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fbfcfe;
+}
+.example-block h4 { margin: 0 0 8px; font-size: 15px; }
+.example-block .problem, .practice-block .problem { margin: 0 0 10px; }
+.example-block .solution {
+  background: var(--good-bg);
+  border-radius: 8px;
+  padding: 10px 12px;
+  white-space: pre-line;
+}
+.reveal-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-dark);
+  cursor: pointer;
+}
+.reveal-btn:hover { background: #f0f1fb; }
+.practice-block .solution {
+  margin-top: 10px;
+  background: var(--good-bg);
+  border-radius: 8px;
+  padding: 10px 12px;
+  white-space: pre-line;
+}
 
 .section-block { margin: 18px 0; }
 .section-block h4 { margin: 0 0 6px; font-size: 16px; }
-.section-block p { margin: 0; }
+.section-block p { margin: 0; white-space: pre-line; }
 
 .callout {
   background: var(--good-bg);

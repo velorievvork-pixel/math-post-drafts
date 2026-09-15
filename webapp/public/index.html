@@ -53,11 +53,17 @@
     <!-- LESSON -->
     <section id="view-lesson" class="view hidden">
       <div class="card">
-        <span class="badge" id="lesson-level"></span>
+        <div class="badges">
+          <span class="badge" id="lesson-level"></span>
+          <span class="badge time">⏱ 30–45 минут на урок</span>
+        </div>
         <h1 id="lesson-title"></h1>
         <p id="lesson-intro" class="intro"></p>
 
         <div id="lesson-sections"></div>
+
+        <h3 id="lesson-examples-title" class="hidden">Разобранные примеры</h3>
+        <div id="lesson-examples"></div>
 
         <div class="callout" id="lesson-takeaways-box">
           <h3>Главное</h3>
@@ -68,6 +74,10 @@
           <h3>Частые ошибки</h3>
           <ul id="lesson-mistakes"></ul>
         </div>
+
+        <h3 id="lesson-practice-title" class="hidden">Задачи для самостоятельной практики</h3>
+        <p id="lesson-practice-hint" class="muted hidden">Попробуй решить сам(а), потом открой решение и сверься.</p>
+        <div id="lesson-practice"></div>
 
         <div class="actions">
           <button id="btn-restart-1" class="btn ghost">Новая тема</button>
@@ -80,6 +90,7 @@
     <!-- QUIZ -->
     <section id="view-quiz" class="view hidden">
       <div class="card">
+        <span class="badge time">⏱ около 15 минут на тест</span>
         <h1>Проверь себя</h1>
         <p class="muted">Отвечай честно — так вернее увидишь, что стоит повторить.</p>
         <form id="quiz-form">
