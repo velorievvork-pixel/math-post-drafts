@@ -33,47 +33,50 @@ body{background:var(--bg);color:var(--ink);font-family:Manrope,'DejaVu Sans',san
 .hero{top:236px}
 .pill{display:inline-flex;align-items:center;gap:10px;background:rgba(227,32,26,.14);border:1.5px solid var(--red);color:#fff;font:800 15px Manrope;letter-spacing:.1em;text-transform:uppercase;padding:9px 16px;border-radius:999px}
 .pill i{width:9px;height:9px;border-radius:50%;background:var(--red2);box-shadow:0 0 10px var(--red2)}
-h1{font:900 57px/1.02 Unbounded,sans-serif;text-transform:uppercase;margin-top:22px;letter-spacing:-.015em;text-shadow:0 6px 30px rgba(0,0,0,.6)}
+h1{font:900 66px/1.02 Unbounded,sans-serif;text-transform:uppercase;margin-top:0;letter-spacing:-.015em;text-shadow:0 6px 30px rgba(0,0,0,.6)}
 h1 em{font-style:normal;color:var(--red2);display:block;text-shadow:0 0 40px rgba(255,59,38,.35)}
-.tag2{margin-top:20px;font:700 17px/1.6 Manrope;letter-spacing:.26em;text-transform:uppercase;color:var(--muted)}
+.tag2{margin-top:22px;font:700 24px/1.35 Manrope;color:#e4e4e1}
 .tag2::after{content:"";display:block;width:70px;height:4px;background:var(--red);margin-top:18px;border-radius:2px}
 
 /* 3D */
-.part{position:absolute;left:-40px;top:452px;width:880px;mask-image:linear-gradient(180deg,transparent 0%,#000 14%,#000 82%,transparent 100%)}
+.part{position:absolute;left:-40px;top:430px;width:880px;mask-image:linear-gradient(180deg,transparent 0%,#000 14%,#000 82%,transparent 100%)}
 
 /* вакансії + переваги */
-.mid{top:1086px;display:grid;grid-template-columns:1fr 236px;gap:26px}
+.mid{top:1056px;display:grid;grid-template-columns:1fr 250px;gap:26px}
 .sec{font:900 38px/1 Unbounded,sans-serif;text-transform:uppercase}
 .sec em{font-style:normal;color:var(--red2);display:block}
 .sec::after{content:"";display:block;width:70px;height:4px;background:var(--red);margin:14px 0 6px;border-radius:2px}
-.jobs li{list-style:none;display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line);font:700 19px/1.28 Manrope;color:#ececea}
+.jobs li{list-style:none;display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font:700 18.5px/1.28 Manrope;color:#ececea}
 .jobs li:last-child{border-bottom:0}
 .jobs li::before{content:"";flex:none;width:11px;height:11px;margin-top:6px;border-top:3.5px solid var(--red2);border-right:3.5px solid var(--red2);transform:rotate(45deg)}
 .jobs li b{color:var(--gold);font-weight:800}
 .perks{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid var(--line);border-radius:18px;padding:6px 18px;align-self:start;margin-top:4px}
-.perk{display:flex;gap:14px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.ptitle{font:900 21px/1.15 Unbounded,sans-serif;text-transform:uppercase;padding:14px 0 12px;border-bottom:2px solid var(--red)}
+.ptitle em{font-style:normal;color:var(--red2);display:block}
+.perk{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .perk:last-child{border-bottom:0}
-.perk svg{flex:none;width:46px;height:46px;stroke:var(--red2);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.perk span{font:800 13.5px/1.35 Manrope;letter-spacing:.07em;text-transform:uppercase}
+.perk svg{flex:none;width:38px;height:38px;stroke:var(--red2);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.perk span{font:800 13px/1.3 Manrope;letter-spacing:.05em;text-transform:uppercase}
 
 /* БРОНЬ */
-.bron{position:absolute;left:0;right:0;top:1592px;height:118px;overflow:hidden}
+.bron{position:absolute;left:0;right:0;top:1572px;height:118px;overflow:hidden}
 .bron .bar{position:absolute;left:-40px;right:56px;top:0;bottom:0;background:linear-gradient(90deg,#b8120c,var(--red) 60%,var(--red2));transform:skewX(-20deg);box-shadow:0 0 50px rgba(227,32,26,.45)}
 .bron .bar2{position:absolute;right:-6px;width:34px;top:0;bottom:0;background:var(--red);transform:skewX(-20deg)}
 .bron .bar3{position:absolute;right:-56px;width:34px;top:0;bottom:0;background:#7d0c08;transform:skewX(-20deg)}
 .bron .t{position:absolute;left:56px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:22px}
-.bron b{font:900 80px/1 Unbounded,sans-serif;letter-spacing:.01em;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.25)}
+.bron b{font:900 37px/1 Unbounded,sans-serif;text-transform:uppercase;white-space:nowrap;letter-spacing:-.01em;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.25)}
+.bron b span{color:#1a0705}
 .bron small{font:800 15px/1.4 Manrope;letter-spacing:.12em;text-transform:uppercase;color:#fff;opacity:.95;border-left:3px solid rgba(255,255,255,.6);padding-left:16px}
 
 /* QR + телефон */
-.cta{top:1730px;display:flex;gap:24px;align-items:center}
-.qr{flex:none;width:136px;height:136px;background:#fff;border-radius:14px;padding:9px;position:relative}
-.qr #qrcode,.qr #qrcode img{width:118px!important;height:118px!important;display:block}
+.cta{top:1708px;display:flex;gap:24px;align-items:center}
+.qr{flex:none;width:150px;height:150px;background:#fff;border-radius:14px;padding:9px;position:relative}
+.qr #qrcode,.qr #qrcode img{width:132px!important;height:132px!important;display:block}
 .qr #qrcode canvas{display:none!important}
 .qr::before{content:"";position:absolute;inset:-7px;border:3px solid var(--red2);border-radius:19px;box-shadow:0 0 22px rgba(255,59,38,.55)}
 .ctxt .s{font:900 21px/1.15 Unbounded,sans-serif;text-transform:uppercase}
 .ctxt .s em{font-style:normal;color:var(--red2)}
-.ctxt .ph{display:flex;align-items:center;gap:12px;margin-top:12px;font:900 38px/1 Unbounded,sans-serif;white-space:nowrap}
+.ctxt .ph{display:flex;align-items:center;gap:14px;font:900 40px/1 Unbounded,sans-serif;white-space:nowrap}
 .ctxt .ph i{flex:none;width:44px;height:44px;border-radius:50%;background:var(--red);display:grid;place-items:center}
 .ctxt .ph svg{width:22px;height:22px;fill:#fff}
 .ctxt .n{font:700 14px Manrope;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:10px}
@@ -88,13 +91,11 @@ h1 em{font-style:normal;color:var(--red2);display:block;text-shadow:0 0 40px rgb
     <img src="hexo_logo.png" alt="">
     <div class="word">HE<span class="x">X</span>O<small>CONSTRUCTIONS</small></div>
   </div>
-  <div class="tags">Виробництво<br>Інженерія<br>Команда<br>Розвиток</div>
 </div>
 
 <div class="pad hero">
-  <div class="pill"><i></i>Для студентів та молодих спеціалістів</div>
-  <h1>Створюй<br>своє&nbsp;майбутнє<em>разом з HEXO</em></h1>
-  <div class="tag2">Сучасне виробництво.<br>Реальні можливості.</div>
+  <h1>Твоя кар’єра<em>починається<br>тут!</em></h1>
+  <div class="tag2">Запрошуємо студентів<br>та молодих спеціалістів</div>
 </div>
 
 <img class="part" src="hexo_part3d.png" alt="">
@@ -105,23 +106,24 @@ h1 em{font-style:normal;color:var(--red2);display:block;text-shadow:0 0 40px rgb
     <ul class="jobs" id="jobs"></ul>
   </div>
   <div class="perks">
-    <div class="perk"><svg viewBox="0 0 48 48"><circle cx="24" cy="15" r="6"/><circle cx="11" cy="19" r="4.5"/><circle cx="37" cy="19" r="4.5"/><path d="M13 40v-4a11 11 0 0 1 22 0v4M3 38v-2a8 8 0 0 1 10-7.7M45 38v-2a8 8 0 0 0-10-7.7"/></svg><span>Дружня<br>команда</span></div>
-    <div class="perk"><svg viewBox="0 0 48 48"><path d="M6 42h36"/><rect x="9" y="30" width="6" height="10"/><rect x="19" y="24" width="6" height="16"/><rect x="29" y="17" width="6" height="23"/><path d="M8 22 20 12l7 5L41 6M34 6h7v7"/></svg><span>Навчання та<br>наставництво</span></div>
-    <div class="perk"><svg viewBox="0 0 48 48"><path d="M24 4l3 5 6-1 1 6 5 3-2 5 2 5-5 3-1 6-6-1-3 5-3-5-6 1-1-6-5-3 2-5-2-5 5-3 1-6 6 1z"/><circle cx="24" cy="24" r="7"/></svg><span>Сучасне<br>обладнання HAAS</span></div>
-    <div class="perk"><svg viewBox="0 0 48 48"><circle cx="22" cy="26" r="17"/><circle cx="22" cy="26" r="10"/><circle cx="22" cy="26" r="3"/><path d="M22 26 40 8M34 8h6v6"/></svg><span>Кар'єрний<br>розвиток</span></div>
+    <div class="ptitle">Ми <em>пропонуємо</em></div>
+    <div class="perk"><svg viewBox="0 0 48 48"><path d="M4 18 24 8l20 10-20 10z"/><path d="M12 22v10c0 3 6 6 12 6s12-3 12-6V22M44 18v12"/></svg><span>Навчання та наставництво</span></div>
+    <div class="perk"><svg viewBox="0 0 48 48"><path d="M24 4l3 5 6-1 1 6 5 3-2 5 2 5-5 3-1 6-6-1-3 5-3-5-6 1-1-6-5-3 2-5-2-5 5-3 1-6 6 1z"/><circle cx="24" cy="24" r="7"/></svg><span>Сучасне обладнання HAAS</span></div>
+    <div class="perk"><svg viewBox="0 0 48 48"><circle cx="24" cy="15" r="6"/><circle cx="11" cy="19" r="4.5"/><circle cx="37" cy="19" r="4.5"/><path d="M13 40v-4a11 11 0 0 1 22 0v4M3 38v-2a8 8 0 0 1 10-7.7M45 38v-2a8 8 0 0 0-10-7.7"/></svg><span>Дружня команда</span></div>
+    <div class="perk"><svg viewBox="0 0 48 48"><path d="M6 42h36"/><rect x="9" y="30" width="6" height="10"/><rect x="19" y="24" width="6" height="16"/><rect x="29" y="17" width="6" height="23"/><path d="M8 22 20 12l7 5L41 6M34 6h7v7"/></svg><span>Кар’єрний розвиток</span></div>
+    <div class="perk"><svg viewBox="0 0 48 48"><path d="M24 4 40 10v12c0 10-7 18-16 22C15 40 8 32 8 22V10z"/><path d="m17 24 5 5 9-10"/></svg><span>Бронювання працівників</span></div>
+    <div class="perk"><svg viewBox="0 0 48 48"><rect x="5" y="14" width="38" height="26" rx="3"/><path d="M17 14v-4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4M5 25h38M21 25v4h6v-4"/></svg><span>Стабільна офіційна робота</span></div>
   </div>
 </div>
 
 <div class="bron"><div class="bar"></div><div class="bar2"></div><div class="bar3"></div>
-  <div class="t"><b>БРОНЬ</b><small>Бронювання працівників<br>Стабільна офіційна робота</small></div>
+  <div class="t"><b>Більше <span>можливостей.</span></b></div>
 </div>
 
 <div class="pad cta">
   <div class="qr"><div id="qrcode"></div></div>
   <div class="ctxt">
-    <div class="s">Скануй QR — <em>більше можливостей</em></div>
     <div class="ph"><i><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></i><span id="phone"></span></div>
-    <div class="n">Дзвони — розкажемо про роботу та навчання</div>
   </div>
 </div>
 
@@ -131,10 +133,10 @@ const CONFIG={
   phone:"+380 95 194 23 88",
   qrUrl:"https://example.com/hexo-vacancies", // ← замінити на реальне посилання
   jobs:[
-    "Оператор-налагоджувальник фрезерних / токарних верстатів з ЧПК <b>(HAAS)</b>",
+    "Оператор – налагоджувальник фрезерних / токарних верстатів з ЧПК <b>(HAAS)</b>",
     "Оператор 3D друку металом",
     "Оператор лазерних верстатів",
-    "Інженер-конструктор",
+    "Інженер – конструктор",
     "Зварювальники",
     "Слюсарі",
     "Комплектувальники"
