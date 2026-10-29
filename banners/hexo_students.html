@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8">
+<title>Hexo Вакансії</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* ===== ДАНІ ДЛЯ ЗАМІНИ — дивись також блок CONFIG у скрипті внизу ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0e0e10;--panel:#18181c;--line:#2a2a30;--ink:#f5f5f2;--muted:#a3a3aa;--red:#e5261c;--red2:#ff4a2e;--gold:#ffc93c}
+@page{size:A4;margin:0}
+html,body{width:794px;height:1123px}
+body{background:var(--bg);color:var(--ink);font-family:Manrope,'DejaVu Sans',sans-serif;overflow:hidden;position:relative}
+.hexbg{position:absolute;inset:0;opacity:.5;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16v32L28 64 0 48V16zM28 64v33' fill='none' stroke='%23232328' stroke-width='1.5'/%3E%3C/svg%3E");background-size:56px 97px;mask-image:linear-gradient(180deg,#000 0%,transparent 70%)}
+.glow{position:absolute;left:50%;top:40px;width:640px;height:520px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(229,38,28,.38),transparent 62%)}
+.stripe{position:absolute;right:-170px;top:230px;width:420px;height:36px;background:repeating-linear-gradient(-45deg,var(--gold) 0 22px,#111 22px 44px);transform:rotate(38deg);opacity:.9}
+.stripe.b{right:auto;left:-230px;top:230px;transform:rotate(38deg)}
+.wrap{position:absolute;inset:0;padding:40px 48px;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;align-items:center;font:800 13px Manrope;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.top .pill{background:var(--red);color:#fff;padding:7px 14px;border-radius:999px}
+.logo{display:block;margin:8px auto 0;height:300px;filter:drop-shadow(0 0 2px rgba(255,255,255,.55)) drop-shadow(0 18px 40px rgba(0,0,0,.6))}
+.brand{text-align:center;font:900 20px Orbitron,sans-serif;letter-spacing:.42em;margin-top:6px;color:var(--ink)}
+.brand span{color:var(--red2)}
+h1{font:900 52px/1 Unbounded,sans-serif;text-align:center;margin-top:22px;letter-spacing:-.01em;text-transform:uppercase}
+h1 em{font-style:normal;color:var(--red2);display:block;font-size:62px;margin-top:4px}
+.perks{display:flex;justify-content:center;gap:10px;margin-top:18px}
+.perks div{font:800 15px Manrope;color:var(--gold);border:2px solid var(--gold);border-radius:10px;padding:6px 12px}
+.jobs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.job{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--red);border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:center}
+.job .n{flex:none;width:42px;height:48px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--red);display:grid;place-items:center;font:900 18px Orbitron}
+.job b{display:block;font:700 17px/1.15 Unbounded,sans-serif}
+.job small{display:block;font:700 14px Manrope;color:var(--muted);margin-top:4px}
+.cta{margin-top:auto;margin-bottom:8px;display:flex;gap:16px;align-items:stretch}
+.phone{flex:1;min-width:0;background:linear-gradient(135deg,var(--red) 0%,#b5150d 100%);border-radius:20px;padding:20px 24px;display:flex;flex-direction:column;justify-content:center;box-shadow:0 14px 40px rgba(229,38,28,.35)}
+.phone .lbl{font:800 15px Manrope;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
+.phone .num{font:900 34px/1.1 Unbounded,sans-serif;margin-top:6px;white-space:nowrap;letter-spacing:-.01em}
+.phone .sub{font:700 15px Manrope;margin-top:8px;opacity:.92}
+.qr{flex:none;width:206px;align-self:center;background:#fff;border-radius:20px;padding:14px 14px 10px;text-align:center;color:#111;position:relative}
+.qr #qrcode{width:178px;height:178px;margin:0 auto}
+.qr #qrcode canvas{display:none!important}
+.qr #qrcode img{display:block!important;width:178px;height:178px}
+.qr .lbl{font:900 15px Unbounded,sans-serif;margin-top:8px;letter-spacing:.04em}
+.qr::before{content:"";position:absolute;inset:-6px;border:3px dashed var(--gold);border-radius:24px}
+</style></head><body>
+<div class="hexbg"></div><div class="glow"></div><div class="stripe"></div><div class="stripe b"></div>
+<div class="wrap">
+  <div class="top"><span class="pill">Вакансії для студентів</span><span>Робота · Практика · Досвід</span></div>
+  <img class="logo" src="hexo_logo.png" alt="Hexo Constructions">
+  <div class="brand"><span>HEXO</span> CONSTRUCTIONS</div>
+  <h1>Будуй кар'єру<em>вже зараз</em></h1>
+  <div class="perks" id="perks"></div>
+  <div class="jobs" id="jobs"></div>
+  <div class="cta">
+    <div class="phone"><div class="lbl">📞 Дзвони або пиши</div><div class="num" id="phone"></div><div class="sub" id="phoneSub"></div></div>
+    <div class="qr"><div id="qrcode"></div><div class="lbl">СКАНУЙ ↗</div></div>
+  </div>
+</div>
+<script>
+// ===== CONFIG: заміни на реальні дані =====
+const CONFIG={
+  phone:"+380 XX XXX XX XX",
+  phoneSub:"Viber · Telegram · WhatsApp",
+  qrUrl:"https://example.com/hexo-vacancies",
+  perks:["Гнучкий графік","Без досвіду","Оплата щотижня"],
+  jobs:[
+    ["Помічник виконроба","стажування на об'єкті"],
+    ["Кресляр / AutoCAD","проєктний відділ"],
+    ["Кошторисник-стажер","розрахунки та закупівлі"],
+    ["Робітник на об'єкт","підробіток, вихідні"]
+  ]
+};
+document.getElementById('phone').textContent=CONFIG.phone;
+document.getElementById('phoneSub').textContent=CONFIG.phoneSub;
+document.getElementById('perks').innerHTML=CONFIG.perks.map(p=>`<div>${p}</div>`).join('');
+document.getElementById('jobs').innerHTML=CONFIG.jobs.map((j,i)=>`<div class="job"><div class="n">${i+1}</div><div><b>${j[0]}</b><small>${j[1]}</small></div></div>`).join('');
+new QRCode(document.getElementById('qrcode'),{text:CONFIG.qrUrl,width:356,height:356,colorDark:"#111111",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+</script></body></html>
