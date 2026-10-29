@@ -1,0 +1,117 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Hexo 3D Part</title>
+<style>html,body{margin:0;background:transparent;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+// 3D-візуалізація для банера: фрезерована алюмінієва деталь + фреза з ЧПК
+import * as THREE from 'three';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const W=+(new URLSearchParams(location.search).get('w')||1600),H=+(new URLSearchParams(location.search).get('h')||1300);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+renderer.setSize(W,H);renderer.setPixelRatio(1);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.35;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const scene=new THREE.Scene();
+const pmrem=new THREE.PMREMGenerator(renderer);
+scene.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture;
+
+// шліфована текстура (radial-brush), щоб метал виглядав обробленим
+function brushTex(dir){
+  const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');
+  g.fillStyle='#7a7a7a';g.fillRect(0,0,512,512);
+  for(let i=0;i<4000;i++){const v=100+Math.random()*80|0;g.strokeStyle=`rgba(${v},${v},${v},.35)`;g.lineWidth=Math.random()*1.2;
+    const y=Math.random()*512;g.beginPath();if(dir){g.moveTo(0,y);g.lineTo(512,y+Math.random()*4-2)}else{g.moveTo(y,0);g.lineTo(y+Math.random()*4-2,512)}g.stroke()}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);return t}
+const metal=new THREE.MeshPhysicalMaterial({color:0xe8ebf0,metalness:1,roughness:.24,roughnessMap:brushTex(1),clearcoat:.5,clearcoatRoughness:.15,envMapIntensity:2.2});
+const darkMetal=new THREE.MeshPhysicalMaterial({color:0x2a2c30,metalness:.9,roughness:.45});
+const holeMat=new THREE.MeshBasicMaterial({color:0x050505});
+
+function rrect(s,x,y,w,h,r){s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);s.lineTo(x+w,y+h-r);s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);s.lineTo(x+r,y+h);s.quadraticCurveTo(x,y+h,x,y+h-r);s.lineTo(x,y+r);s.quadraticCurveTo(x,y,x+r,y);}
+function holePath(x,y,r){const p=new THREE.Path();p.absarc(x,y,r,0,Math.PI*2,true);return p}
+function rrPath(x,y,w,h,r){const p=new THREE.Path();rrect(p,x,y,w,h,r);return p}
+
+const part=new THREE.Group();scene.add(part);
+const L=10,D=6.4;
+// основа з наскрізними отворами
+const base=new THREE.Shape();rrect(base,-L/2,-D/2,L,D,.5);
+[[-3.4,-1.6],[0,-1.6],[3.4,-1.6],[-3.4,1.6],[0,1.6],[3.4,1.6]].forEach(([x,y])=>base.holes.push(holePath(x,y,.32)));
+const bg=new THREE.ExtrudeGeometry(base,{depth:.6,bevelEnabled:true,bevelThickness:.06,bevelSize:.06,bevelSegments:3,curveSegments:24});
+const baseM=new THREE.Mesh(bg,metal);baseM.rotation.x=-Math.PI/2;part.add(baseM);
+// рамка з кишенями 3x2 і діагональними ребрами в центрі
+const frame=new THREE.Shape();rrect(frame,-L/2,-D/2,L,D,.5);
+const pw=2.85,ph=2.45,gap=.42;
+for(let i=0;i<3;i++)for(let j=0;j<2;j++){
+  const x=-L/2+.5+i*(pw+gap+.06),y=-D/2+.5+j*(ph+gap+.06);
+  if(i===1){ // центральні кишені — трикутні (ребро по діагоналі)
+    const t=new THREE.Path(),r=.12;
+    if(j===0){t.moveTo(x+r,y);t.lineTo(x+pw-.5,y);t.lineTo(x+pw,y+ph-.6);t.lineTo(x+pw,y+ph);t.lineTo(x+.5,y+ph);t.lineTo(x,y+.6);t.lineTo(x,y+r);}
+    else{t.moveTo(x+.5,y);t.lineTo(x+pw,y);t.lineTo(x+pw,y+ph-.6);t.lineTo(x+pw-.5,y+ph);t.lineTo(x,y+ph);t.lineTo(x,y+.5);}
+    frame.holes.push(t);
+  } else frame.holes.push(rrPath(x,y,pw,ph,.35));
+}
+const fg=new THREE.ExtrudeGeometry(frame,{depth:1.25,bevelEnabled:true,bevelThickness:.05,bevelSize:.05,bevelSegments:3,curveSegments:24});
+const frameM=new THREE.Mesh(fg,metal);frameM.rotation.x=-Math.PI/2;frameM.position.y=.6;part.add(frameM);
+// отвори на верхній грані рамки та бокові отвори
+const topY=.6+1.25+.05;
+[[-L/2+.25,0],[L/2-.25,0],[0,-D/2+.25],[0,D/2-.25],[-1.66,-D/2+.25],[1.66,D/2-.25]].forEach(([x,z])=>{
+  const h=new THREE.Mesh(new THREE.CircleGeometry(.12,24),holeMat);h.rotation.x=-Math.PI/2;h.position.set(x,topY+.002,-z);part.add(h)});
+[-3.4,-1.2,1.2,3.4].forEach(x=>{
+  const ring=new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.08,32,1,true),metal);ring.rotation.x=Math.PI/2;ring.position.set(x,1.15,D/2+.07);part.add(ring);
+  const h=new THREE.Mesh(new THREE.CircleGeometry(.3,32),holeMat);h.position.set(x,1.15,D/2+.071);part.add(h)});
+// болти в кишенях
+[[-3.4,-1.6],[3.4,1.6],[-3.4,1.6],[3.4,-1.6]].forEach(([x,z])=>{
+  const b=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.18,6),darkMetal);b.position.set(x,.75,-z);part.add(b)});
+part.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+part.rotation.y=-.42;
+
+// фреза: шпиндель + патрон + різальна частина зі спіраллю
+const tool=new THREE.Group();scene.add(tool);
+const fluteTex=(()=>{const c=document.createElement('canvas');c.width=256;c.height=512;const g=c.getContext('2d');
+  const gr=g.createLinearGradient(0,0,256,0);gr.addColorStop(0,'#555');gr.addColorStop(.5,'#eee');gr.addColorStop(1,'#555');g.fillStyle=gr;g.fillRect(0,0,256,512);
+  g.strokeStyle='#111';g.lineWidth=26;for(let k=-6;k<10;k++){g.beginPath();g.moveTo(-40,k*80);g.lineTo(296,k*80+170);g.stroke()}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t})();
+const cutter=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,2.1,48),new THREE.MeshPhysicalMaterial({map:fluteTex,metalness:1,roughness:.22}));cutter.position.y=1.05;tool.add(cutter);
+const tip=new THREE.Mesh(new THREE.SphereGeometry(.3,32,16,0,Math.PI*2,Math.PI/2,Math.PI/2),metal);tool.add(tip);
+const shank=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,1.4,48),new THREE.MeshPhysicalMaterial({color:0xe8e8ea,metalness:1,roughness:.15}));shank.position.y=2.8;tool.add(shank);
+const collet=new THREE.Mesh(new THREE.CylinderGeometry(.75,.45,1.1,48),new THREE.MeshPhysicalMaterial({color:0xb9bcc2,metalness:1,roughness:.25}));collet.position.y=3.95;tool.add(collet);
+const nut=new THREE.Mesh(new THREE.CylinderGeometry(.95,.95,.7,6),darkMetal);nut.position.y=4.8;tool.add(nut);
+const spindle=new THREE.Mesh(new RoundedBoxGeometry(2.6,7,2.6,4,.25),new THREE.MeshPhysicalMaterial({color:0x1c1d21,metalness:.8,roughness:.4}));spindle.position.y=8.6;tool.add(spindle);
+const redRing=new THREE.Mesh(new THREE.TorusGeometry(1.05,.06,12,64),new THREE.MeshBasicMaterial({color:0xff2a1a}));redRing.rotation.x=Math.PI/2;redRing.position.y=5.2;tool.add(redRing);
+tool.position.set(3.1,topY-.75,-.6);
+tool.traverse(o=>{if(o.isMesh)o.castShadow=true});
+
+// іскри від точки різання
+const sparkPos=[],sparkCol=[];const origin=new THREE.Vector3(3.1,topY-.6,-.6);
+for(let i=0;i<220;i++){const a=Math.random()*Math.PI*2,el=Math.random()*1.1+.1,len=.4+Math.random()*2.4,s=.25+Math.random()*.4;
+  const d=new THREE.Vector3(Math.cos(a)*Math.cos(el),Math.sin(el),Math.sin(a)*Math.cos(el));
+  const p0=origin.clone().add(d.clone().multiplyScalar(s)),p1=origin.clone().add(d.clone().multiplyScalar(s+len*.35));p1.y-=len*len*.05;
+  sparkPos.push(p0.x,p0.y,p0.z,p1.x,p1.y,p1.z);const c1=new THREE.Color().setHSL(.08+Math.random()*.05,1,.75),c2=new THREE.Color(0xff3010);
+  sparkCol.push(c1.r,c1.g,c1.b,c2.r,c2.g,c2.b)}
+const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(sparkPos,3));sg.setAttribute('color',new THREE.Float32BufferAttribute(sparkCol,3));
+scene.add(new THREE.LineSegments(sg,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.95,blending:THREE.AdditiveBlending})));
+// світіння в точці різання
+const glowTex=(()=>{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');const gr=g.createRadialGradient(128,128,0,128,128,128);
+  gr.addColorStop(0,'rgba(255,230,180,1)');gr.addColorStop(.2,'rgba(255,120,40,.8)');gr.addColorStop(.55,'rgba(255,40,20,.25)');gr.addColorStop(1,'rgba(255,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,256,256);return new THREE.CanvasTexture(c)})();
+const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false}));glow.position.copy(origin);glow.scale.set(3.2,3.2,1);scene.add(glow);
+
+// світло: холодний ключовий + червоні контурні
+scene.add(new THREE.HemisphereLight(0xffffff,0x220000,.25));
+const key=new THREE.DirectionalLight(0xffffff,3.6);key.position.set(-6,12,8);key.castShadow=true;key.shadow.mapSize.set(2048,2048);
+Object.assign(key.shadow.camera,{left:-10,right:10,top:10,bottom:-10});key.shadow.radius=6;scene.add(key);
+const redA=new THREE.SpotLight(0xff2010,700,40,.7,.6);redA.position.set(10,3.5,-4);scene.add(redA);
+const redB=new THREE.SpotLight(0xff2a14,520,40,.8,.6);redB.position.set(-11,2.5,-2);scene.add(redB);
+const fill=new THREE.SpotLight(0xffffff,420,50,.5,.8);fill.position.set(2,14,14);scene.add(fill);
+const tipL=new THREE.PointLight(0xff6020,40,8,1.6);tipL.position.copy(origin).add(new THREE.Vector3(0,.4,.4));scene.add(tipL);
+// тіньовий «пол»
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(60,60),new THREE.ShadowMaterial({opacity:.55}));floor.rotation.x=-Math.PI/2;floor.position.y=-.07;floor.receiveShadow=true;scene.add(floor);
+
+const cam=new THREE.PerspectiveCamera(32,W/H,.1,200);
+cam.position.set(5,7.8,15.5);cam.lookAt(.5,1.9,0);
+renderer.render(scene,cam);
+window.__done=true;
+</script></body></html>
