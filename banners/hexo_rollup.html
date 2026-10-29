@@ -80,6 +80,13 @@ h1 em{font-style:normal;color:var(--red2);display:block;text-shadow:0 0 40px rgb
 .ctxt .ph i{flex:none;width:44px;height:44px;border-radius:50%;background:var(--red);display:grid;place-items:center}
 .ctxt .ph svg{width:22px;height:22px;fill:#fff}
 .ctxt .n{font:700 14px Manrope;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:10px}
+
+/* водяний знак: вмикається через ?wm=1 */
+.wm{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:99}
+.wm .grid{position:absolute;left:-60%;top:-30%;width:220%;height:160%;transform:rotate(-30deg);display:flex;flex-direction:column;justify-content:space-around}
+.wm .row{white-space:nowrap;font:900 34px Unbounded,sans-serif;letter-spacing:.06em;color:rgba(255,255,255,.13);-webkit-text-stroke:1px rgba(0,0,0,.18)}
+.wm .row:nth-child(even){margin-left:-140px}
+.wm .big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-30deg);font:900 120px Unbounded,sans-serif;color:rgba(255,255,255,.16);-webkit-text-stroke:2px rgba(0,0,0,.2);white-space:nowrap}
 </style></head><body>
 <div class="bgfx"></div><div class="hexbg"></div>
 <div class="slash" style="right:-60px;top:0;width:150px;height:30px"></div>
@@ -145,4 +152,11 @@ const CONFIG={
 document.getElementById('phone').textContent=CONFIG.phone;
 document.getElementById('jobs').innerHTML=CONFIG.jobs.map(j=>`<li><span>${j}</span></li>`).join('');
 new QRCode(document.getElementById('qrcode'),{text:CONFIG.qrUrl,width:472,height:472,colorDark:"#111111",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+
+if(new URLSearchParams(location.search).get('wm')){
+  const wm=document.createElement('div');wm.className='wm';
+  const row=Array(12).fill('@veloriev').join('\u2003\u2003');
+  wm.innerHTML='<div class="grid">'+Array(26).fill('<div class="row">'+row+'</div>').join('')+'</div><div class="big">@veloriev</div>';
+  document.body.appendChild(wm);
+}
 </script></body></html>
